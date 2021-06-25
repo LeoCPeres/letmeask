@@ -1,4 +1,5 @@
 import { useHistory } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
 
 import { FormEvent, useState } from "react";
 
@@ -36,7 +37,12 @@ export function Home() {
     const roomRef = await database.ref(`rooms/${roomCode}`).get();
 
     if (!roomRef.exists()) {
-      alert("Room does not exists.");
+      toast.error("Esta sala não existe.");
+      return;
+    }
+
+    if (roomRef.val().endedAt) {
+      toast.error("Esta sala terminou.");
       return;
     }
 
@@ -45,6 +51,7 @@ export function Home() {
 
   return (
     <div id="page-auth">
+      <Toaster />
       <aside>
         <img
           src={IlustrationImg}
