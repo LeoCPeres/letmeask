@@ -1,5 +1,4 @@
-import { useParams, Link, useHistory } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
+import { useParams, Link } from "react-router-dom";
 
 import LogoImg from "../assets/images/logo.svg";
 import deleteImg from "../assets/images/delete.svg";
@@ -8,6 +7,7 @@ import checkImg from "../assets/images/check.svg";
 import emptyImg from "../assets/images/empty-questions.svg";
 
 import { Button } from "../components/Button";
+import { Modal } from "../components/Modal";
 import { Question } from "../components/Question";
 import { RoomCode } from "../components/RoomCode";
 import { useAuth } from "../hooks/useAuth";
@@ -15,26 +15,21 @@ import { database } from "../services/firebase";
 
 import "../styles/room.scss";
 import { useRoom } from "../hooks/useRoom";
+import { useContext } from "react";
+import { ModalContext } from "../contexts/ModalContext";
 
 type RoomParams = {
   id: string;
 };
 
 export function AdminRoom() {
-  const { user } = useAuth();
   const params = useParams<RoomParams>();
-  const history = useHistory();
+
+  const { handleToggleModalDeleteQuestion, handleToggleModalCloseRoom } =
+    useContext(ModalContext);
 
   const roomId = params.id;
   const { title, questions } = useRoom(roomId);
-
-  async function handleEndRoom() {
-    await database.ref(`rooms/${roomId}`).update({
-      endedAt: new Date(),
-    });
-
-    history.push("/");
-  }
 
   async function handleCheckQuestionAsAnswered(questionId: string) {
     await database.ref(`rooms/${roomId}/questions/${questionId}`).update({
@@ -57,15 +52,8 @@ export function AdminRoom() {
     }
   }
 
-  async function handleDeleteQuestion(questionId: string) {
-    if (window.confirm("Você tem certeza que deseja excluir essa pergunta?")) {
-      await database.ref(`rooms/${roomId}/questions/${questionId}`).remove();
-    }
-  }
-
   return (
     <div id="page-room">
-      <Toaster />
       <header>
         <div className="content">
           <Link to="/">
@@ -73,12 +61,19 @@ export function AdminRoom() {
           </Link>
           <div>
             <RoomCode code={roomId} />
-            <Button isOutlined onClick={handleEndRoom}>
+            <Button isOutlined onClick={handleToggleModalCloseRoom}>
               Encerrar Sala
             </Button>
           </div>
         </div>
       </header>
+
+      <Modal
+        isClose
+        questionId=""
+        title="Encerrar sala"
+        subtitle="Tem certeza que você deseja encerrar esta sala?"
+      />
 
       <main>
         <div className="room-title">
@@ -140,7 +135,7 @@ export function AdminRoom() {
                   )}
                   <button
                     type="button"
-                    onClick={() => handleDeleteQuestion(question.id)}
+                    onClick={handleToggleModalDeleteQuestion}
                   >
                     <img src={deleteImg} alt="Remover pergunta" />
                   </button>
@@ -149,6 +144,12 @@ export function AdminRoom() {
                       {question.likeCount} Likes
                     </span>
                   )}
+                  <Modal
+                    isDelete
+                    questionId={question.id}
+                    title="Excluir pergunta"
+                    subtitle="Tem certeza que você deseja excluir esta pergunta?"
+                  />
                 </Question>
               );
             })}

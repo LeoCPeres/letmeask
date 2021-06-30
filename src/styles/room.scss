@@ -294,6 +294,11 @@
               color: #29292e;
               font-weight: 500;
               font-size: 14px;
+
+              &:hover {
+                text-decoration: underline;
+                cursor: pointer;
+              }
             }
           }
 

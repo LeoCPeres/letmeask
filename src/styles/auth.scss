@@ -60,6 +60,20 @@
       align-self: center;
     }
 
+    span {
+      font-size: 14px;
+      margin-top: 8px;
+      color: #a8a8b3;
+
+      span {
+        &:hover {
+          text-decoration: underline;
+          cursor: pointer;
+          color: #835afd;
+        }
+      }
+    }
+
     h2 {
       font-size: 24px;
       margin: 64px 0 24px;

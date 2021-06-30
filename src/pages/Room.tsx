@@ -1,4 +1,4 @@
-import { useState, FormEvent, useEffect } from "react";
+import { useState, FormEvent, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -6,6 +6,7 @@ import LogoImg from "../assets/images/logo.svg";
 import emptyImg from "../assets/images/empty-questions.svg";
 
 import { Button } from "../components/Button";
+import { Modal } from "../components/Modal";
 import { Question } from "../components/Question";
 import { RoomCode } from "../components/RoomCode";
 import { useAuth } from "../hooks/useAuth";
@@ -13,6 +14,7 @@ import { database } from "../services/firebase";
 
 import "../styles/room.scss";
 import { useRoom } from "../hooks/useRoom";
+import { ModalContext } from "../contexts/ModalContext";
 
 type RoomParams = {
   id: string;
@@ -31,6 +33,8 @@ export function Room() {
     }
   }
 
+  const { handleToggleModalLogOut } = useContext(ModalContext);
+
   async function handleSendQuestion(event: FormEvent) {
     event.preventDefault();
 
@@ -41,7 +45,7 @@ export function Room() {
     const roomRef = await database.ref(`rooms/${roomId}`).get();
 
     if (!user) {
-      toast.error("You must be logged in.");
+      toast.error("Você precisa estar logado.");
     }
 
     if (roomRef.val().endedAt) {
@@ -116,7 +120,7 @@ export function Room() {
             {user ? (
               <div className="user-info">
                 <img src={user.avatar} alt={user.name} />
-                <span>{user.name}</span>
+                <span onClick={handleToggleModalLogOut}>{user.name}</span>
               </div>
             ) : (
               <span>
@@ -185,6 +189,12 @@ export function Room() {
             })}
         </div>
       </main>
+      <Modal
+        isLoggout
+        questionId=""
+        title="Finalizar sessão"
+        subtitle="Tem certeza que você deseja finalizar a sessão?"
+      />
     </div>
   );
 }
