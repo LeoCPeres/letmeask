@@ -87,7 +87,7 @@ export function AdminRoom() {
         </div>
 
         <div className="question-list">
-          {questions.length == 0 && (
+          {questions.length === 0 && (
             <div className="empty">
               <img src={emptyImg} alt="" />
               <h1>Nenhuma pergunta por aqui...</h1>
